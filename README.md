@@ -8,7 +8,7 @@ In the simulated demo data, 79 invoices fell due in the last 30 days and only 28
 
 I ran a building-materials store for 17 years, so I have chased my share of late invoices. The hard part was rarely the call itself. It was deciding who to call when ten customers owed money and I had one afternoon.
 
-![Findings](screenshots/04-findings.png)
+![Findings](4.png)
 
 ## What it does
 
