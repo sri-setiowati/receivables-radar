@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UD Sinar Bangun Jaya - Receivables Radar - demo dashboard</title>
+<meta name="description" content="Interactive receivables aging dashboard (Piutang Radar) - demo built from simulated data of a fictional building-materials distributor. Single self-contained HTML file.">
+<meta property="og:title" content="UD Sinar Bangun Jaya - Receivables Radar - demo dashboard">
+<meta property="og:description" content="Receivables aging dashboard demo: overdue percentages, aging buckets, top debtors, DSO and on-time payment - all from simulated data, computed in the browser.">
+<meta property="og:type" content="website">
+<style>:root{--bg:#F4F6FA;--kartu:#FFFFFF;--garis:#E5E7EB;--tinta:#1F2937;--redup:#6B7280;
+--utama:#1E3A5F;--utama-tua:#12263F;--teal:#0F7B6C;--jejak:#EEF1F5}
+*{box-sizing:border-box}
+body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--tinta);
+margin:0;padding:0 0 52px;font-size:16px;line-height:1.5}
+.hero{background:linear-gradient(135deg,#12263F,#1E3A5F);color:#FFFFFF;padding:24px 0 64px}
+.hero-badan{max-width:1100px;margin:0 auto;padding:0 16px}
+.hero-baris{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.hero-atas{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.hero-tgl{margin-top:2px;font-size:13px;color:rgba(255,255,255,.75)}
+.pilih-bahasa{display:flex;gap:6px}
+.pilih-bahasa button{background:transparent;border:1px solid rgba(255,255,255,.4);color:#FFFFFF;
+border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.pilih-bahasa button.aktif{background:#FFFFFF;color:var(--utama)}
+.hero-tengah{margin-top:20px;display:flex;justify-content:space-between;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.hero-hasil{min-width:0}
+.hero-label{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.hero-angka{margin-top:2px;font-size:38px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hero-ket{margin-top:4px;font-size:14px;color:rgba(255,255,255,.85);max-width:640px}
+.ring{width:112px;height:112px}
+.hero-ring{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.ring-label{font-size:12px;color:rgba(255,255,255,.75);text-align:center;max-width:160px}
+.badan{max-width:1100px;margin:-38px auto 0;padding:0 16px}
+.kip-baris{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.kip{background:var(--kartu);border:1px solid var(--garis);border-radius:14px;box-shadow:0 1px 2px rgba(18,38,63,.06);padding:14px 18px}
+.kip-huruf{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--redup);font-weight:600}
+.kip-nilai{margin-top:8px;font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--utama)}
+.kip-ket{margin-top:2px;color:var(--redup);font-size:13px}
+.chip-baris{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.chip-filter{padding:6px 12px;border-radius:999px;border:1px solid var(--garis);background:#FFFFFF;
+font-size:13px;color:#374151;cursor:pointer;font-family:inherit;font-weight:600}
+.chip-filter.aktif{background:var(--utama);color:#FFFFFF;border-color:var(--utama)}
+.chip-baris.filter-umur{margin-top:14px}
+.bagian{margin-top:28px}
+.bagian h2{color:var(--utama);font-size:20px;font-weight:700;margin:0}
+.ket{color:var(--redup);font-size:14px;margin-top:2px}
+.kartu{background:var(--kartu);border:1px solid var(--garis);border-radius:14px;box-shadow:0 1px 2px rgba(18,38,63,.06);padding:16px 20px}
+.tri-grafik{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.grafik-judul{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.judul-kecil{font-size:13px;font-weight:700;color:#374151}
+.nilai-kecil{font-size:13px;color:var(--redup);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ket_legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding:0}
+.ket_legend button{list-style:none;border:none;background:transparent;padding:0;font-family:inherit;
+display:flex;align-items:center;gap:6px;font-size:13px;color:#374151;cursor:pointer}
+.dot{width:10px;height:10px;border-radius:999px;flex:none}
+.bar-luar{height:16px;border-radius:8px;overflow:hidden;display:flex;background:var(--jejak);margin-top:14px}
+.bar-luar span{display:block;height:100%}
+.sisi-umur{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px;align-items:stretch}
+.kolom-umur{flex:2;min-width:260px;display:flex;align-items:flex-end;gap:6px;height:190px}
+.kolom-umur .kol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;
+border-radius:6px 6px 0 0;overflow:hidden}
+.kolom-umur .kol span{display:block}
+.kolom-umur .kol.aktif{outline:2px solid var(--utama);outline-offset:2px}
+.baris-bulan{flex:1;min-width:200px;display:grid;grid-template-columns:1fr 1fr;gap:4px;align-content:start}
+.barisbulan button{list-style:none;border:none;background:transparent;font-family:inherit;text-align:left;
+font-size:12px;color:#374151;cursor:pointer;padding:2px 0}
+.barisbulan button.aktif{color:var(--utama);font-weight:700}
+.kartu.tabel{padding:0;margin-top:12px}
+.jungkit{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.kartu.tabel table{width:100%;border-collapse:collapse;font-size:15px;min-width:520px}
+th{position:sticky;top:0;background:#FFFFFF;color:var(--utama);text-align:right;font-size:12px;
+letter-spacing:.04em;text-transform:uppercase;font-weight:700;padding:12px 16px;box-shadow:0 1px 0 var(--garis);white-space:nowrap;z-index:2}
+th.kolom-nama{text-align:left}
+th:last-child{text-align:left}
+td{padding:12px 16px;border-top:1px solid var(--garis);vertical-align:top}
+tbody tr:hover{background:#F4F6FA}
+td.angka-col{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ket-kolom{color:var(--redup);font-size:12px;margin-top:2px;font-variant-numeric:tabular-nums}
+.baris-kosong td{text-align:center;color:var(--redup);padding:20px}
+.lencana{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+ul#daftar-temuan{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:14px}
+ul#daftar-temuan li{display:flex;gap:12px;align-items:flex-start}
+ul#daftar-temuan .tautan-urut{width:28px;height:28px;border-radius:999px;background:#E3EAF5;color:var(--utama);
+font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+ul#daftar-temuan b{font-size:13px;color:var(--redup)}
+ul#daftar-temuan p{margin:4px 0 0;font-size:14px;color:#374151}
+.kaki{margin-top:32px;color:var(--redup);font-size:13px}
+.notif-bulan{margin-top:16px;background:var(--jejak);border-left:3px solid var(--utama);
+padding:8px 12px;border-radius:8px;font-size:13px;color:#374151;font-weight:600}
+.chip-baris-ket{color:var(--redup)}
+.lencana-demo{position:fixed;right:12px;bottom:12px;z-index:60;background:#12263F;color:#FFFFFF;
+font-size:11px;padding:6px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(18,38,63,.35)}
+@media (max-width:760px){
+ .hero-angka{font-size:30px}.ring{width:92px;height:92px}
+ .sisi-umur{flex-direction:column}.kolom-umur{width:100%}
+ .kip-nilai{font-size:22px}.kip{padding:12px 14px}
+ .kartu{padding:14px}
+ .lencana-demo{position:static;display:block;margin:16px 16px 0;padding:5px 10px;
+  font-size:10px;text-align:center;border-radius:10px;width:auto}
+ body{padding-bottom:12px}
+}
+@media print{
+@page{size:A4 portrait;margin:10mm}
+body{background:#FFFFFF;padding:0;font-size:12px}
+.badan{margin:0;padding:0 4mm;max-width:none}
+.hero{background:#FFFFFF;color:#12263F;border-bottom:2px solid #1E3A5F;padding:8px 0 10px}
+.hero-atas,.hero-tgl,.hero-label,.ring-label{color:#6B7280}
+.hero-angka,.ring text{color:#12263F}
+.hero-angka{color:#12263F}
+.ring text{fill:#12263F}
+.pilih-bahasa,.chip-baris{display:none}
+.kip{box-shadow:none}
+.bagian{margin-top:14px}
+th{position:static;box-shadow:none}
+table{font-size:10px}
+th,td{padding:4px 6px}
+.lencana-demo{position:static;margin-top:8px;display:inline-block}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}</style>
+</head>
+<body>
+<section class="hero">
+ <div class="hero-badan">
+  <div class="hero-baris">
+   <div>
+    <div class="hero-atas">UD Sinar Bangun Jaya</div>
+    <div class="hero-tgl"><span data-i18n="laporan_per">Laporan per</span> <span id="tgl-hero"></span></div>
+   </div>
+   <div class="pilih-bahasa" role="group" aria-label="Language / Bahasa">
+     <button type="button" id="tbl-id">ID</button>
+     <button type="button" id="tbl-en" class="aktif">EN</button>
+    </div>
+  </div>
+  <div class="hero-tengah">
+   <div class="hero-hasil">
+    <div class="hero-label" data-i18n="total_piutang">Total piutang</div>
+    <div class="hero-angka" id="hero-angka"></div>
+    <div class="hero-ket" id="hero-ket"></div>
+   </div>
+   <div class="hero-ring">
+    <svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Persentase telat dari total">
+     <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="10"/>
+     <circle id="ring-isi" cx="60" cy="60" r="52" fill="none" stroke="#7FD1C0" stroke-width="10" stroke-linecap="round" pathLength="100" transform="rotate(-90 60 60)"/>
+     <text x="60" y="68" text-anchor="middle" font-size="22" font-weight="700" fill="#FFFFFF" id="ring-teks"></text>
+    </svg>
+    <div class="ring-label" data-i18n="ring_label">dari piutang sudah telat</div>
+   </div>
+  </div>
+ </div>
+</section>
+<div class="badan">
+ <div class="notif-bulan" id="notif-bulan"></div>
+  <div class="kip-baris">
+  <div class="kip"><div class="kip-huruf" data-i18n="kip_telat">Sudah telat</div><div class="kip-nilai" id="kip-1"></div><div class="kip-ket" id="ket-1"></div></div>
+  <div class="kip"><div class="kip-huruf" data-i18n="kip_maket">Telat lebih dari 90 hari</div><div class="kip-nilai" id="kip-2"></div><div class="kip-ket" id="ket-2"></div></div>
+  <div class="kip"><div class="kip-huruf" data-i18n="kip_dso">DSO (hari)</div><div class="kip-nilai" id="kip-3"></div><div class="kip-ket" id="ket-3"></div></div>
+  <div class="kip"><div class="kip-huruf" data-i18n="kip_tepat">Dibayar tepat waktu (%)</div><div class="kip-nilai" id="kip-4"></div><div class="kip-ket" id="ket-4"></div></div>
+ </div>
+  <div class="chip-baris-ket ket" id="chip_bulan_ket" data-i18n="chip_bulan_ket" style="margin-top:18px"></div>
+  <div class="chip-baris" id="chip-bulan" role="tablist" aria-label="Pilih bulan analisis"></div>
+ <div class="bagian">
+  <h2 data-i18n="tren_judul">Tren 12 bulan</h2>
+  <div class="ket" data-i18n="tren_ket"></div>
+  <div class="tri-grafik">
+   <div class="kartu"><div class="grafik-judul"><span class="judul-kecil" data-i18n="g_piutang"></span><span class="nilai-kecil" id="nilai-g1"></span></div><div id="g1"></div></div>
+   <div class="kartu"><div class="grafik-judul"><span class="judul-kecil" data-i18n="g_dso"></span><span class="nilai-kecil" id="nilai-g2"></span></div><div id="g2"></div></div>
+   <div class="kartu"><div class="grafik-judul"><span class="judul-kecil" data-i18n="g_tepat"></span><span class="nilai-kecil" id="nilai-g3"></span></div><div id="g3"></div></div>
+  </div>
+ </div>
+ <div class="bagian">
+  <h2 data-i18n="umur_judul">Umur piutang</h2>
+  <div class="ket" data-i18n="umur_ket"></div>
+  <div class="ket_legend" id="leg-umur" aria-label="Legenda kelompok keterlambatan"></div>
+  <div class="sisi-umur">
+   <div>
+    <div class="kolom-umur" id="kolom-umur"></div>
+   </div>
+   <div class="baris-bulan" id="baris-nama"></div>
+  </div>
+ </div>
+ <div class="bagian">
+  <h2 data-i18n="penunggak_judul">10 penunggak terbesar</h2>
+  <div class="ket" data-i18n="penunggak_ket"></div>
+  <div class="chip-baris filter-umur" id="chip-umur"></div>
+   <div class="kartu tabel">
+    <div class="jungkit">
+    <table id="tabel-penunggak">
+     <thead><tr>
+      <th class="kolom-nama" data-i18n="kol_pelanggan"></th>
+      <th data-i18n="kol_sisa"></th>
+      <th data-i18n="kol_telat"></th>
+      <th data-i18n="kol_smelat"></th>
+     </tr></thead>
+     <tbody id="daftar-penunggak"></tbody>
+    </table>
+    </div>
+   </div>
+ </div>
+ <div class="bagian">
+  <div class="kartu">
+   <h2 style="margin:0" data-i18n="temuan_judul">Temuan & Rekomendasi</h2>
+   <div class="ket" data-i18n="temuan_ket"></div>
+   <ul id="daftar-temuan"></ul>
+  </div>
+ </div>
+ <div class="kaki" data-i18n="kaki"></div>
+</div>
+<div class="lencana-demo">Data simulasi untuk demonstrasi / Simulated data for demonstration</div>
+<script type="application/json" id="data-demo">{"seed": 2026, "nama_usaha": "UD Sinar Bangun Jaya", "urutan_bucket": ["belum jatuh tempo", "1-30", "31-60", "61-90", ">90"], "warna_bucket": {"belum jatuh tempo": "5B9A8B", "1-30": "E3B04B", "31-60": "E08A3C", "61-90": "D1584A", ">90": "9B2C2C"}, "warna_lencana": {"belum jatuh tempo": ["E6F2EF", "2F6B5E"], "1-30": ["FCF1D6", "8A5F00"], "31-60": ["FBE6D2", "9A4B0F"], "61-90": ["F8DCD8", "A3342A"], ">90": ["F0D4D4", "7A1F1F"]}, "bulan": [{"kunci": "2025-11", "tgl": "2025-11-25", "label": "Nov 2025", "label_en": "Nov 2025", "tgl_id": "25 November 2025", "tgl_en": "November, 25 2025", "total_piutang": 554729000, "total_lewat": 109771000, "pct_lewat": 19.8, "telat90": 7125000, "n_lewat": 13, "n_pelanggan": 39, "penjualan": 245583000, "penjualan_30": 245583000, "dso": 67.8, "tepat_waktu": 43.5, "buckets": {"belum jatuh tempo": 444958000, "1-30": 54423000, "31-60": 33337000, "61-90": 14886000, ">90": 7125000}, "top10": [{"nama": "CV Lamongan Mulya", "sisa": 47934000, "telat": 36962000, "umur_tertua": 65}, {"nama": "CV Garuda Sekarwangi", "sisa": 74554000, "telat": 21325000, "umur_tertua": 41}, {"nama": "CV Amarah Perkasa", "sisa": 13113000, "telat": 13113000, "umur_tertua": 27}, {"nama": "CV Pipercraft", "sisa": 29861000, "telat": 10030000, "umur_tertua": 42}, {"nama": "Toko Bangunan Cahaya Mas", "sisa": 16819000, "telat": 7187000, "umur_tertua": 1}, {"nama": "Herman Perkasa", "sisa": 6217000, "telat": 5249000, "umur_tertua": 146}, {"nama": "Toko Material Srikaton", "sisa": 12107000, "telat": 4795000, "umur_tertua": 91}, {"nama": "CV Sarbini Fadhilah", "sisa": 8563000, "telat": 2984000, "umur_tertua": 47}, {"nama": "CV Pilar Abadi", "sisa": 14862000, "telat": 2759000, "umur_tertua": 157}, {"nama": "Bpk. Wawan Setiawan", "sisa": 14092000, "telat": 1861000, "umur_tertua": 69}], "temuan": {"puncak": {"pct": 80.7, "top5": [["CV Lamongan Mulya", 36962000], ["CV Garuda Sekarwangi", 21325000], ["CV Amarah Perkasa", 13113000], ["CV Pipercraft", 10030000], ["Toko Bangunan Cahaya Mas", 7187000]]}, "macet": {"rp": 7125000, "pct": 1.3}, "dso": {"val": 67.8, "prev": null, "delta": null}}}, {"kunci": "2025-12", "tgl": "2025-12-25", "label": "Des 2025", "label_en": "Dec 2025", "tgl_id": "25 Desember 2025", "tgl_en": "December, 25 2025", "total_piutang": 483128000, "total_lewat": 146176000, "pct_lewat": 30.3, "telat90": 11842000, "n_lewat": 15, "n_pelanggan": 40, "penjualan": 223829000, "penjualan_30": 223829000, "dso": 64.8, "tepat_waktu": 39.7, "buckets": {"belum jatuh tempo": 336952000, "1-30": 111098000, "31-60": 22663000, "61-90": 573000, ">90": 11842000}, "top10": [{"nama": "CV Garuda Sekarwangi", "sisa": 63767000, "telat": 43635000, "umur_tertua": 43}, {"nama": "CV Pipercraft", "sisa": 37328000, "telat": 22970000, "umur_tertua": 72}, {"nama": "CV Amarah Perkasa", "sisa": 21560000, "telat": 21560000, "umur_tertua": 34}, {"nama": "CV Lamongan Mulya", "sisa": 22229000, "telat": 16385000, "umur_tertua": 33}, {"nama": "Toko Material Srikaton", "sisa": 12478000, "telat": 7856000, "umur_tertua": 121}, {"nama": "Herman Perkasa", "sisa": 8608000, "telat": 6217000, "umur_tertua": 176}, {"nama": "CV Sarbini Fadhilah", "sisa": 8615000, "telat": 6197000, "umur_tertua": 53}, {"nama": "CV Pilar Abadi", "sisa": 17492000, "telat": 6195000, "umur_tertua": 187}, {"nama": "UD Bangun Sejahtera", "sisa": 9008000, "telat": 5053000, "umur_tertua": 2}, {"nama": "UD Buah Riang", "sisa": 3128000, "telat": 3128000, "umur_tertua": 9}], "temuan": {"puncak": {"pct": 76.9, "top5": [["CV Garuda Sekarwangi", 43635000], ["CV Pipercraft", 22970000], ["CV Amarah Perkasa", 21560000], ["CV Lamongan Mulya", 16385000], ["Toko Material Srikaton", 7856000]]}, "macet": {"rp": 11842000, "pct": 2.5}, "dso": {"val": 64.8, "prev": 67.8, "delta": -3.0}}}, {"kunci": "2026-01", "tgl": "2026-01-25", "label": "Jan 2026", "label_en": "Jan 2026", "tgl_id": "25 Januari 2026", "tgl_en": "January, 25 2026", "total_piutang": 431504000, "total_lewat": 133954000, "pct_lewat": 31.0, "telat90": 12415000, "n_lewat": 17, "n_pelanggan": 39, "penjualan": 215647000, "penjualan_30": 215647000, "dso": 60.0, "tepat_waktu": 32.1, "buckets": {"belum jatuh tempo": 297550000, "1-30": 62704000, "31-60": 51042000, "61-90": 7793000, ">90": 12415000}, "top10": [{"nama": "CV Garuda Sekarwangi", "sisa": 55798000, "telat": 34385000, "umur_tertua": 74}, {"nama": "CV Amarah Perkasa", "sisa": 21507000, "telat": 20634000, "umur_tertua": 65}, {"nama": "CV Pipercraft", "sisa": 38134000, "telat": 20404000, "umur_tertua": 103}, {"nama": "CV Mitra Karya Makmur", "sisa": 24639000, "telat": 13268000, "umur_tertua": 172}, {"nama": "CV Lamongan Mulya", "sisa": 12565000, "telat": 12565000, "umur_tertua": 29}, {"nama": "Herman Perkasa", "sisa": 6217000, "telat": 6217000, "umur_tertua": 207}, {"nama": "PT Cipta Karya Mandiri", "sisa": 17434000, "telat": 5683000, "umur_tertua": 5}, {"nama": "CV Sarbini Fadhilah", "sisa": 8719000, "telat": 5112000, "umur_tertua": 84}, {"nama": "CV Pilar Abadi", "sisa": 7739000, "telat": 2759000, "umur_tertua": 218}, {"nama": "CV Mega Sky", "sisa": 3648000, "telat": 2014000, "umur_tertua": 132}], "temuan": {"puncak": {"pct": 75.6, "top5": [["CV Garuda Sekarwangi", 34385000], ["CV Amarah Perkasa", 20634000], ["CV Pipercraft", 20404000], ["CV Mitra Karya Makmur", 13268000], ["CV Lamongan Mulya", 12565000]]}, "macet": {"rp": 12415000, "pct": 2.9}, "dso": {"val": 60.0, "prev": 64.8, "delta": -4.8}}}, {"kunci": "2026-02", "tgl": "2026-02-25", "label": "Feb 2026", "label_en": "Feb 2026", "tgl_id": "25 Februari 2026", "tgl_en": "February, 25 2026", "total_piutang": 522089000, "total_lewat": 118774000, "pct_lewat": 22.7, "telat90": 15926000, "n_lewat": 19, "n_pelanggan": 40, "penjualan": 350775000, "penjualan_30": 350775000, "dso": 44.7, "tepat_waktu": 36.7, "buckets": {"belum jatuh tempo": 403315000, "1-30": 61774000, "31-60": 36875000, "61-90": 4199000, ">90": 15926000}, "top10": [{"nama": "CV Lamongan Mulya", "sisa": 37408000, "telat": 30488000, "umur_tertua": 39}, {"nama": "CV Garuda Sekarwangi", "sisa": 64894000, "telat": 20948000, "umur_tertua": 105}, {"nama": "CV Pipercraft", "sisa": 31511000, "telat": 14931000, "umur_tertua": 134}, {"nama": "CV Amarah Perkasa", "sisa": 25727000, "telat": 13057000, "umur_tertua": 34}, {"nama": "Herman Perkasa", "sisa": 6217000, "telat": 6217000, "umur_tertua": 238}, {"nama": "CV Sarbini Fadhilah", "sisa": 10730000, "telat": 4225000, "umur_tertua": 115}, {"nama": "Toko Bangunan Cahaya Mas", "sisa": 7124000, "telat": 3992000, "umur_tertua": 2}, {"nama": "UD Buah Riang", "sisa": 3977000, "telat": 3977000, "umur_tertua": 4}, {"nama": "Toko Satelit", "sisa": 9107000, "telat": 2974000, "umur_tertua": 247}, {"nama": "CV Pilar Abadi", "sisa": 15130000, "telat": 2759000, "umur_tertua": 249}], "temuan": {"puncak": {"pct": 72.1, "top5": [["CV Lamongan Mulya", 30488000], ["CV Garuda Sekarwangi", 20948000], ["CV Pipercraft", 14931000], ["CV Amarah Perkasa", 13057000], ["Herman Perkasa", 6217000]]}, "macet": {"rp": 15926000, "pct": 3.1}, "dso": {"val": 44.7, "prev": 60.0, "delta": -15.3}}}, {"kunci": "2026-03", "tgl": "2026-03-25", "label": "Mar 2026", "label_en": "Mar 2026", "tgl_id": "25 Maret 2026", "tgl_en": "March, 25 2026", "total_piutang": 721536000, "total_lewat": 164578000, "pct_lewat": 22.8, "telat90": 20125000, "n_lewat": 22, "n_pelanggan": 39, "penjualan": 458327000, "penjualan_30": 458327000, "dso": 47.2, "tepat_waktu": 40.3, "buckets": {"belum jatuh tempo": 556958000, "1-30": 112853000, "31-60": 26431000, "61-90": 5169000, ">90": 20125000}, "top10": [{"nama": "CV Amarah Perkasa", "sisa": 33078000, "telat": 26221000, "umur_tertua": 55}, {"nama": "CV Lamongan Mulya", "sisa": 25661000, "telat": 25661000, "umur_tertua": 28}, {"nama": "CV Garuda Sekarwangi", "sisa": 74954000, "telat": 22229000, "umur_tertua": 133}, {"nama": "CV Pipercraft", "sisa": 36686000, "telat": 18303000, "umur_tertua": 162}, {"nama": "UD Sumber Sari Material", "sisa": 24993000, "telat": 10094000, "umur_tertua": 3}, {"nama": "Bpk. Wawan Setiawan", "sisa": 11044000, "telat": 7484000, "umur_tertua": 189}, {"nama": "CV Sarbini Fadhilah", "sisa": 11810000, "telat": 7123000, "umur_tertua": 143}, {"nama": "UD Buah Riang", "sisa": 6915000, "telat": 6915000, "umur_tertua": 2}, {"nama": "CV Mega Sky", "sisa": 6246000, "telat": 6246000, "umur_tertua": 191}, {"nama": "Herman Perkasa", "sisa": 12333000, "telat": 6217000, "umur_tertua": 266}], "temuan": {"puncak": {"pct": 62.3, "top5": [["CV Amarah Perkasa", 26221000], ["CV Lamongan Mulya", 25661000], ["CV Garuda Sekarwangi", 22229000], ["CV Pipercraft", 18303000], ["UD Sumber Sari Material", 10094000]]}, "macet": {"rp": 20125000, "pct": 2.8}, "dso": {"val": 47.2, "prev": 44.7, "delta": 2.5}}}, {"kunci": "2026-04", "tgl": "2026-04-25", "label": "Apr 2026", "label_en": "Apr 2026", "tgl_id": "25 April 2026", "tgl_en": "April, 25 2026", "total_piutang": 670976000, "total_lewat": 202582000, "pct_lewat": 30.2, "telat90": 25294000, "n_lewat": 28, "n_pelanggan": 39, "penjualan": 317330000, "penjualan_30": 317330000, "dso": 63.4, "tepat_waktu": 34.2, "buckets": {"belum jatuh tempo": 468394000, "1-30": 133544000, "31-60": 39002000, "61-90": 4742000, ">90": 25294000}, "top10": [{"nama": "CV Garuda Sekarwangi", "sisa": 62409000, "telat": 33071000, "umur_tertua": 164}, {"nama": "CV Lamongan Mulya", "sisa": 28542000, "telat": 28542000, "umur_tertua": 40}, {"nama": "CV Amarah Perkasa", "sisa": 27561000, "telat": 23348000, "umur_tertua": 86}, {"nama": "PT Cipta Karya Mandiri", "sisa": 30678000, "telat": 19185000, "umur_tertua": 7}, {"nama": "Bengkel Nina Putri", "sisa": 19073000, "telat": 14708000, "umur_tertua": 8}, {"nama": "CV Sarbini Fadhilah", "sisa": 16884000, "telat": 11810000, "umur_tertua": 174}, {"nama": "PT Gedung Kencana", "sisa": 34483000, "telat": 9822000, "umur_tertua": 57}, {"nama": "CV Pipercraft", "sisa": 34073000, "telat": 6890000, "umur_tertua": 193}, {"nama": "Herman Perkasa", "sisa": 12480000, "telat": 6883000, "umur_tertua": 297}, {"nama": "CV Cerah Logam", "sisa": 36251000, "telat": 6313000, "umur_tertua": 98}], "temuan": {"puncak": {"pct": 58.7, "top5": [["CV Garuda Sekarwangi", 33071000], ["CV Lamongan Mulya", 28542000], ["CV Amarah Perkasa", 23348000], ["PT Cipta Karya Mandiri", 19185000], ["Bengkel Nina Putri", 14708000]]}, "macet": {"rp": 25294000, "pct": 3.8}, "dso": {"val": 63.4, "prev": 47.2, "delta": 16.2}}}, {"kunci": "2026-05", "tgl": "2026-05-25", "label": "Mei 2026", "label_en": "May 2026", "tgl_id": "25 Mei 2026", "tgl_en": "May, 25 2026", "total_piutang": 649489000, "total_lewat": 186793000, "pct_lewat": 28.8, "telat90": 30036000, "n_lewat": 28, "n_pelanggan": 39, "penjualan": 331581000, "penjualan_30": 331581000, "dso": 58.8, "tepat_waktu": 33.3, "buckets": {"belum jatuh tempo": 462696000, "1-30": 92345000, "31-60": 58834000, "61-90": 5578000, ">90": 30036000}, "top10": [{"nama": "CV Garuda Sekarwangi", "sisa": 67639000, "telat": 41079000, "umur_tertua": 194}, {"nama": "CV Amarah Perkasa", "sisa": 28527000, "telat": 19383000, "umur_tertua": 116}, {"nama": "CV Pipercraft", "sisa": 58672000, "telat": 18956000, "umur_tertua": 223}, {"nama": "CV Sarbini Fadhilah", "sisa": 19325000, "telat": 10379000, "umur_tertua": 204}, {"nama": "CV Lamongan Mulya", "sisa": 16784000, "telat": 9801000, "umur_tertua": 31}, {"nama": "Toko Setia Karya", "sisa": 28413000, "telat": 8577000, "umur_tertua": 4}, {"nama": "CV Cerah Logam", "sisa": 21868000, "telat": 7966000, "umur_tertua": 128}, {"nama": "Toko Intan Bangun", "sisa": 7814000, "telat": 7814000, "umur_tertua": 81}, {"nama": "UD Buah Riang", "sisa": 13984000, "telat": 7110000, "umur_tertua": 1}, {"nama": "Herman Perkasa", "sisa": 18373000, "telat": 6883000, "umur_tertua": 327}], "temuan": {"puncak": {"pct": 53.3, "top5": [["CV Garuda Sekarwangi", 41079000], ["CV Amarah Perkasa", 19383000], ["CV Pipercraft", 18956000], ["CV Sarbini Fadhilah", 10379000], ["CV Lamongan Mulya", 9801000]]}, "macet": {"rp": 30036000, "pct": 4.6}, "dso": {"val": 58.8, "prev": 63.4, "delta": -4.6}}}, {"kunci": "2026-06", "tgl": "2026-06-25", "label": "Jun 2026", "label_en": "Jun 2026", "tgl_id": "25 Juni 2026", "tgl_en": "June, 25 2026", "total_piutang": 659326000, "total_lewat": 183139000, "pct_lewat": 27.8, "telat90": 35614000, "n_lewat": 25, "n_pelanggan": 40, "penjualan": 361689000, "penjualan_30": 361689000, "dso": 54.7, "tepat_waktu": 43.5, "buckets": {"belum jatuh tempo": 476187000, "1-30": 93423000, "31-60": 38047000, "61-90": 16055000, ">90": 35614000}, "top10": [{"nama": "CV Lamongan Mulya", "sisa": 58351000, "telat": 32653000, "umur_tertua": 62}, {"nama": "CV Garuda Sekarwangi", "sisa": 60288000, "telat": 30154000, "umur_tertua": 225}, {"nama": "CV Pipercraft", "sisa": 62491000, "telat": 27756000, "umur_tertua": 254}, {"nama": "CV Amarah Perkasa", "sisa": 17916000, "telat": 17916000, "umur_tertua": 147}, {"nama": "CV Sarbini Fadhilah", "sisa": 22604000, "telat": 13411000, "umur_tertua": 235}, {"nama": "Toko Intan Bangun", "sisa": 19264000, "telat": 8386000, "umur_tertua": 112}, {"nama": "Bpk. Wawan Setiawan", "sisa": 12168000, "telat": 7436000, "umur_tertua": 281}, {"nama": "Herman Perkasa", "sisa": 9069000, "telat": 6883000, "umur_tertua": 358}, {"nama": "UD Buah Riang", "sisa": 4262000, "telat": 4262000, "umur_tertua": 9}, {"nama": "Toko Satelit", "sisa": 21027000, "telat": 3967000, "umur_tertua": 367}], "temuan": {"puncak": {"pct": 66.6, "top5": [["CV Lamongan Mulya", 32653000], ["CV Garuda Sekarwangi", 30154000], ["CV Pipercraft", 27756000], ["CV Amarah Perkasa", 17916000], ["CV Sarbini Fadhilah", 13411000]]}, "macet": {"rp": 35614000, "pct": 5.4}, "dso": {"val": 54.7, "prev": 58.8, "delta": -4.1}}}, {"kunci": "2026-07", "tgl": "2026-07-25", "label": "Jul 2026", "label_en": "Jul 2026", "tgl_id": "25 Juli 2026", "tgl_en": "July, 25 2026", "total_piutang": 716468000, "total_lewat": 229450000, "pct_lewat": 32.0, "telat90": 39553000, "n_lewat": 29, "n_pelanggan": 40, "penjualan": 359938000, "penjualan_30": 359938000, "dso": 59.7, "tepat_waktu": 37.7, "buckets": {"belum jatuh tempo": 487018000, "1-30": 127969000, "31-60": 56417000, "61-90": 5511000, ">90": 39553000}, "top10": [{"nama": "CV Lamongan Mulya", "sisa": 60300000, "telat": 41567000, "umur_tertua": 33}, {"nama": "CV Pipercraft", "sisa": 63566000, "telat": 32194000, "umur_tertua": 284}, {"nama": "CV Garuda Sekarwangi", "sisa": 69333000, "telat": 27376000, "umur_tertua": 255}, {"nama": "CV Amarah Perkasa", "sisa": 27738000, "telat": 17916000, "umur_tertua": 177}, {"nama": "CV Sarbini Fadhilah", "sisa": 22275000, "telat": 15820000, "umur_tertua": 265}, {"nama": "Toko Satelit", "sisa": 16101000, "telat": 11443000, "umur_tertua": 397}, {"nama": "UD Bangun Sejahtera", "sisa": 20080000, "telat": 10002000, "umur_tertua": 213}, {"nama": "Herman Perkasa", "sisa": 11636000, "telat": 9470000, "umur_tertua": 388}, {"nama": "CV Pilar Abadi", "sisa": 31723000, "telat": 8664000, "umur_tertua": 399}, {"nama": "UD Sumber Sari Material", "sisa": 21372000, "telat": 7697000, "umur_tertua": 7}], "temuan": {"puncak": {"pct": 58.8, "top5": [["CV Lamongan Mulya", 41567000], ["CV Pipercraft", 32194000], ["CV Garuda Sekarwangi", 27376000], ["CV Amarah Perkasa", 17916000], ["CV Sarbini Fadhilah", 15820000]]}, "macet": {"rp": 39553000, "pct": 5.5}, "dso": {"val": 59.7, "prev": 54.7, "delta": 5.0}}}, {"kunci": "2026-08", "tgl": "2026-08-25", "label": "Agu 2026", "label_en": "Aug 2026", "tgl_id": "25 Agustus 2026", "tgl_en": "August, 25 2026", "total_piutang": 759528000, "total_lewat": 237395000, "pct_lewat": 31.3, "telat90": 45064000, "n_lewat": 29, "n_pelanggan": 39, "penjualan": 355575000, "penjualan_30": 355575000, "dso": 64.1, "tepat_waktu": 37.9, "buckets": {"belum jatuh tempo": 522133000, "1-30": 98007000, "31-60": 91186000, "61-90": 3138000, ">90": 45064000}, "top10": [{"nama": "CV Lamongan Mulya", "sisa": 56249000, "telat": 49731000, "umur_tertua": 54}, {"nama": "CV Pipercraft", "sisa": 69836000, "telat": 35308000, "umur_tertua": 315}, {"nama": "CV Garuda Sekarwangi", "sisa": 75667000, "telat": 30950000, "umur_tertua": 286}, {"nama": "CV Sarbini Fadhilah", "sisa": 16543000, "telat": 12956000, "umur_tertua": 296}, {"nama": "PT Cipta Karya Mandiri", "sisa": 27762000, "telat": 12422000, "umur_tertua": 58}, {"nama": "Herman Perkasa", "sisa": 13550000, "telat": 10716000, "umur_tertua": 419}, {"nama": "CV Amarah Perkasa", "sisa": 15529000, "telat": 10695000, "umur_tertua": 208}, {"nama": "CV Pilar Abadi", "sisa": 27092000, "telat": 9173000, "umur_tertua": 430}, {"nama": "CV Mitra Karya Makmur", "sisa": 27764000, "telat": 7674000, "umur_tertua": 384}, {"nama": "Hj. Ratna Store", "sisa": 31019000, "telat": 6437000, "umur_tertua": 6}], "temuan": {"puncak": {"pct": 59.5, "top5": [["CV Lamongan Mulya", 49731000], ["CV Pipercraft", 35308000], ["CV Garuda Sekarwangi", 30950000], ["CV Sarbini Fadhilah", 12956000], ["PT Cipta Karya Mandiri", 12422000]]}, "macet": {"rp": 45064000, "pct": 5.9}, "dso": {"val": 64.1, "prev": 59.7, "delta": 4.4}}}, {"kunci": "2026-09", "tgl": "2026-09-25", "label": "Sep 2026", "label_en": "Sep 2026", "tgl_id": "25 September 2026", "tgl_en": "September, 25 2026", "total_piutang": 760907000, "total_lewat": 196616000, "pct_lewat": 25.8, "telat90": 50040000, "n_lewat": 29, "n_pelanggan": 39, "penjualan": 371913000, "penjualan_30": 371913000, "dso": 61.4, "tepat_waktu": 33.3, "buckets": {"belum jatuh tempo": 564291000, "1-30": 106055000, "31-60": 23513000, "61-90": 17008000, ">90": 50040000}, "top10": [{"nama": "CV Garuda Sekarwangi", "sisa": 89187000, "telat": 42773000, "umur_tertua": 317}, {"nama": "CV Pipercraft", "sisa": 44087000, "telat": 21809000, "umur_tertua": 346}, {"nama": "CV Amarah Perkasa", "sisa": 21427000, "telat": 21427000, "umur_tertua": 239}, {"nama": "CV Lamongan Mulya", "sisa": 24437000, "telat": 11818000, "umur_tertua": 32}, {"nama": "Toko Intan Bangun", "sisa": 17228000, "telat": 11485000, "umur_tertua": 204}, {"nama": "Toko Satelit", "sisa": 15336000, "telat": 9467000, "umur_tertua": 459}, {"nama": "CV Sarbini Fadhilah", "sisa": 8609000, "telat": 7550000, "umur_tertua": 327}, {"nama": "Hj. Ratna Store", "sisa": 35328000, "telat": 6956000, "umur_tertua": 10}, {"nama": "Herman Perkasa", "sisa": 15439000, "telat": 6883000, "umur_tertua": 450}, {"nama": "UD Bangun Sejahtera", "sisa": 18149000, "telat": 5946000, "umur_tertua": 275}], "temuan": {"puncak": {"pct": 55.6, "top5": [["CV Garuda Sekarwangi", 42773000], ["CV Pipercraft", 21809000], ["CV Amarah Perkasa", 21427000], ["CV Lamongan Mulya", 11818000], ["Toko Intan Bangun", 11485000]]}, "macet": {"rp": 50040000, "pct": 6.6}, "dso": {"val": 61.4, "prev": 64.1, "delta": -2.7}}}, {"kunci": "2026-10", "tgl": "2026-10-25", "label": "Okt 2026", "label_en": "Oct 2026", "tgl_id": "25 Oktober 2026", "tgl_en": "October, 25 2026", "total_piutang": 758409000, "total_lewat": 241392000, "pct_lewat": 31.8, "telat90": 57226000, "n_lewat": 32, "n_pelanggan": 40, "penjualan": 388516000, "penjualan_30": 388516000, "dso": 58.6, "tepat_waktu": 35.4, "buckets": {"belum jatuh tempo": 517017000, "1-30": 121423000, "31-60": 51672000, "61-90": 11071000, ">90": 57226000}, "top10": [{"nama": "CV Garuda Sekarwangi", "sisa": 119345000, "telat": 45533000, "umur_tertua": 347}, {"nama": "CV Lamongan Mulya", "sisa": 62469000, "telat": 42076000, "umur_tertua": 62}, {"nama": "CV Pipercraft", "sisa": 38275000, "telat": 19800000, "umur_tertua": 376}, {"nama": "Toko Sinar Baru", "sisa": 25026000, "telat": 11494000, "umur_tertua": 252}, {"nama": "PT Gedung Kencana", "sisa": 24251000, "telat": 9997000, "umur_tertua": 240}, {"nama": "CV Sarbini Fadhilah", "sisa": 15968000, "telat": 8609000, "umur_tertua": 357}, {"nama": "Bengkel Nina Putri", "sisa": 13283000, "telat": 8491000, "umur_tertua": 1}, {"nama": "CV Pilar Abadi", "sisa": 28924000, "telat": 8355000, "umur_tertua": 491}, {"nama": "PT Cipta Karya Mandiri", "sisa": 18281000, "telat": 7628000, "umur_tertua": 119}, {"nama": "Herman Perkasa", "sisa": 6883000, "telat": 6883000, "umur_tertua": 480}], "temuan": {"puncak": {"pct": 53.4, "top5": [["CV Garuda Sekarwangi", 45533000], ["CV Lamongan Mulya", 42076000], ["CV Pipercraft", 19800000], ["Toko Sinar Baru", 11494000], ["PT Gedung Kencana", 9997000]]}, "macet": {"rp": 57226000, "pct": 7.5}, "dso": {"val": 58.6, "prev": 61.4, "delta": -2.8}}}]}</script>
+
+<script>
+(function(){
+ var DEMO = JSON.parse(document.getElementById('data-demo').textContent);
+ var bulan = DEMO.bulan;
+ var npm = DEMO.nama_usaha;
+ var negara = {lang: 'en', bulan: bulan.length - 1, filter: ''};
+ try {
+  var simpan = localStorage.getItem('demo-lang');
+  if (simpan === 'id' || simpan === 'en') negara.lang = simpan;
+ } catch(e){}
+
+ var TEKS = {
+  id: {
+   laporan_per: 'Laporan per', total_piutang: 'Total piutang',
+   ring_label: 'dari piutang sudah telat',
+   kip_telat: 'Sudah telat', kip_maket: 'Telat lebih dari 90 hari',
+   kip_dso: 'DSO (hari)', kip_tepat: 'Dibayar tepat waktu (%)',
+   chip_bulan_ket: 'Bulan laporan (tiap tombol = kondisi per tanggal 25)',
+   tren_judul: 'Tren 12 bulan',
+   tren_ket: 'Piutang akhir bulan, DSO, dan persentase tepat waktu; titik menandai bulan terpilih.',
+   g_piutang: 'Piutang akhir bulan', g_dso: 'DSO (hari)', g_tepat: 'Dibayar tepat waktu (%)',
+   umur_judul: 'Umur piutang',
+   umur_ket: 'Setiap kolom satu bulan; banding batang per kelompok keterlambatan. Klik kolom untuk memilih bulan.',
+   penunggak_judul: '10 penunggak terbesar',
+   penunggak_ket: 'Urut dari sisa menunggak terbesar bulan terpilih.',
+   kol_pelanggan: 'Pelanggan', kol_sisa: 'Belum dibayar', kol_telat: 'Sudah telat',
+   kol_smelat: 'Keterlambatan', semua: 'Semua',
+   tamu_kosong: 'Tidak ada penunggak di kelompok ini.',
+   temuan_judul: 'Temuan & Rekomendasi',
+   temuan_ket: 'Dihitung otomatis dari data bulan terpilih.',
+   kaki: 'Demo portofolio Piutang Radar - data simulasi distributor bahan bangunan fiktif.',
+   hero_ket: 'Ikhtisar piutang bulan terpilih.',
+   ket_1: '{p}% dari total piutang',
+   ket_2: 'paling berisiko tidak tertagih',
+   ket_3: 'rumus (piutang akhir / penjualan 30 hari terakhir) x 30',
+   ket_4: 'dari nota yang jatuh tempo 30 hari terakhir, ini yang lunas paling lambat pada tanggal jatuh tempo',
+   bucket: {'belum jatuh tempo': 'Belum jatuh tempo', '1-30': 'Telat 1-30 hari',
+            '31-60': 'Telat 31-60 hari', '61-90': 'Telat 61-90 hari', '>90': 'Telat di atas 90 hari'},
+   t1: 'Lima pelanggan teratas menyumbang {pct} piutang lewat tempo: {daftar}. Prioritaskan penagihan ke daftar ini.',
+   t1_kosong: 'Belum ada piutang lewat tempo pada bulan ini.',
+   t2_besar: 'Invoice macet >90 hari {rp_s} ({pct} dari total piutang). Pertimbangkan cadangan kerugian piutang tak tertagih.',
+   t2_kecil: 'Invoice macet >90 hari {rp_s} ({pct} dari total piutang). Perketat penagihan nota lama agar tidak tumbuh.',
+   t2_nol: 'Tidak ada invoice macet >90 hari pada bulan ini.',
+   t3_naik: 'DSO bulan ini {dso} hari, naik {d} hari dibanding {bln} - siklus tagihan memburuk.',
+   t3_turun: 'DSO bulan ini {dso} hari, turun {d} hari dibanding {bln} - siklus tagihan membaik.',
+   t3_sama: 'DSO bulan ini {dso} hari, tetap dibanding {bln}.',
+   t3_perdana: 'DSO bulan ini {dso} hari - belum ada pembanding bulan sebelumnya.',
+   temuan_puncak: 'Konsentrasi menunggak', temuan_macet: 'Piutang macet >90 hari',
+   temuan_dso: 'Kecepatan tagihan (DSO)'
+  },
+  en: {
+   laporan_per: 'Report as of', total_piutang: 'Total receivables',
+   ring_label: 'of receivables are overdue',
+   kip_telat: 'Overdue', kip_maket: 'Overdue 90+ days',
+   kip_dso: 'DSO (days)', kip_tepat: 'Paid on time (%)',
+   chip_bulan_ket: 'Reporting month (each button shows the books as of the 25th)',
+   tren_judul: '12-month trend',
+   tren_ket: 'Month-end balance, DSO, and paid-on-time share; the dot marks the selected month.',
+   g_piutang: 'Month-end receivables', g_dso: 'DSO (days)', g_tepat: 'Paid on time (%)',
+   umur_judul: 'Aging profile',
+   umur_ket: 'One column per month; compare bars by aging bucket. Click a column to pick the month.',
+   penunggak_judul: 'Top 10 largest debtors',
+   penunggak_ket: 'Sorted by largest overdue balance of the selected month.',
+   kol_pelanggan: 'Customer', kol_sisa: 'Outstanding', kol_telat: 'Overdue',
+   kol_smelat: 'Aging', semua: 'All',
+   tamu_kosong: 'No debtors in this bucket.',
+   temuan_judul: 'Findings & Recommendations',
+   temuan_ket: 'Computed automatically from the selected month.',
+   kaki: 'Receivables Radar portfolio demo - simulated data of a fictional building-materials distributor',
+   hero_ket: 'Receivables overview of the selected month.',
+   ket_1: '{p}% of total receivables',
+   ket_2: 'highest risk of never being collected',
+   ket_3: 'formula: month-end balance / trailing 30-day sales x 30',
+   ket_4: 'of invoices due in the last 30 days, share paid no later than the due date',
+   bucket: {'belum jatuh tempo': 'Not yet due', '1-30': 'Overdue 1-30 days',
+            '31-60': 'Overdue 31-60 days', '61-90': 'Overdue 61-90 days', '>90': 'Overdue 90+ days'},
+   t1: 'Top five customers hold {pct} of overdue receivables: {daftar}. Prioritize collection on this list.',
+   t1_kosong: 'No overdue receivables this month.',
+   t2_besar: 'Stuck invoices 90+ days {rp_s} ({pct} of total receivables). Consider a bad-debt allowance.',
+   t2_kecil: 'Stuck invoices 90+ days {rp_s} ({pct} of total receivables). Tighten collection on old invoices before this grows.',
+   t2_nol: 'No stuck invoices 90+ days this month.',
+   t3_naik: 'DSO is {dso} days, up {d} days vs {bln} - the collection cycle is worsening.',
+   t3_turun: 'DSO is {dso} days, down {d} days vs {bln} - the collection cycle is improving.',
+   t3_sama: 'DSO is {dso} days, unchanged vs {bln}.',
+   t3_perdana: 'DSO is {dso} days - first month, no prior month to compare.',
+   temuan_puncak: 'Overdue concentration', temuan_macet: 'Stuck receivables 90+ days',
+   temuan_dso: 'Collection speed (DSO)'
+  }
+ };
+
+ function t(k){ return TEKS[negara.lang][k]; }
+ function teksAman(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+ function isiKotak(id, txt){ var el = document.getElementById(id); if (el){ el.textContent = txt; } }
+ function namaBulan(i){ return negara.lang === 'en' ? bulan[i].label_en : bulan[i].label; }
+
+ function fmtRupiah(n){
+  var pemisah = negara.lang === 'id' ? '.' : ',';
+  var s = Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, pemisah);
+  return (n < 0 ? '-' : '') + 'Rp ' + s;
+ }
+ function fmtRpSingkat(n){
+  var id_lang = negara.lang === 'id';
+  var x = Math.abs(n), tangga = [[1e9, id_lang ? 'M' : 'B'], [1e6, id_lang ? 'jt' : 'M'],
+   [1e3, id_lang ? 'rb' : 'K']], i;
+  for (i = 0; i < tangga.length; i++){
+   if (x >= tangga[i][0]){
+    var y = x / tangga[i][0];
+    var tx = y.toFixed(1).replace(/\.0$/, '').replace('.', id_lang ? ',' : '.');
+    return id_lang ? 'Rp ' + tx + ' ' + tangga[i][1] : 'Rp ' + tx + tangga[i][1];
+   }
+  }
+  return fmtRupiah(n);
+ }
+ function fmtDes(n){
+  var tx = (Math.round(n * 10) / 10).toFixed(1);
+  return tx.replace('.', negara.lang === 'id' ? ',' : '.');
+ }
+ function kodeUmur(umur){
+  return umur <= 0 ? 'belum jatuh tempo'
+   : (umur <= 30 ? '1-30' : (umur <= 60 ? '31-60' : (umur <= 90 ? '61-90' : '>90')));
+ }
+ function lencanaUmur(umur){
+  var kode = kodeUmur(umur);
+  var warna = DEMO.warna_lencana[kode];
+  var teks = umur <= 0 ? t('bucket')['belum jatuh tempo']
+   : umur + ' ' + (negara.lang === 'id' ? 'hari' : (umur === 1 ? 'day' : 'days'));
+  return '<span class="lencana" style="background:#' + warna[0] + ';color:#' + warna[1] + '">' + teksAman(teks) + '</span>';
+ }
+ function pasangTeks(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function(el){
+   el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.getElementById('tbl-id').classList.toggle('aktif', negara.lang === 'id');
+  document.getElementById('tbl-en').classList.toggle('aktif', negara.lang === 'en');
+  var produk = negara.lang === 'id' ? 'Piutang Radar' : 'Receivables Radar';
+  document.documentElement.setAttribute('lang', negara.lang);
+  document.title = npm + ' - ' + produk + ' - ' + t('temuan_judul');
+ }
+
+ function tampilHero(){
+  isiKotak('notif-bulan', notifBulan());
+  var b = bulan[negara.bulan];
+  isiKotak('tgl-hero', fmtTanggal(b.tgl));
+  isiKotak('hero-angka', fmtRpSingkat(b.total_piutang));
+  isiKotak('hero-ket', t('hero_ket'));
+  var pct = b.pct_lewat;
+  document.getElementById('ring-isi').style.strokeDasharray = pct.toFixed(1) + ' ' + (100 - pct).toFixed(1);
+  document.getElementById('ring-teks').textContent = fmtDes(pct) + '%';
+  isiKotak('kip-1', fmtRpSingkat(b.total_lewat));
+  isiKotak('ket-1', t('ket_1').replace('{p}', fmtDes(b.pct_lewat)));
+  isiKotak('kip-2', fmtRpSingkat(b.telat90));
+  isiKotak('ket-2', t('ket_2'));
+  isiKotak('kip-3', fmtDes(b.dso));
+  isiKotak('ket-3', t('ket_3'));
+  isiKotak('kip-4', fmtDes(b.tepat_waktu) + '%');
+  isiKotak('ket-4', t('ket_4'));
+  isiKotak('nilai-g1', 'max ' + fmtRpSingkat(Math.max.apply(null, bulan.map(function(x){ return x.total_piutang; }))));
+  isiKotak('nilai-g2', 'max ' + fmtDes(Math.max.apply(null, bulan.map(function(x){ return x.dso; }))));
+  isiKotak('nilai-g3', 'max ' + fmtDes(Math.max.apply(null, bulan.map(function(x){ return x.tepat_waktu; }))));
+ }
+ function fmtTanggal(iso){
+  var pcs = iso.split('-'), d = new Date(+pcs[0], +pcs[1] - 1, +pcs[2]);
+  var pjg = BULAN_PJG[negara.lang][d.getMonth()];
+  if (negara.lang === 'en'){ return pjg + ' ' + d.getDate() + ', ' + d.getFullYear(); }
+  return d.getDate() + ' ' + pjg + ' ' + d.getFullYear();
+ }
+ var BULAN_PJG = {
+  id: ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
+  en: ['January','February','March','April','May','June','July','August','September','October','November','December']
+ };
+ var BULAN_SPT = {
+  id: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
+  en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+ };
+ function notifBulan(){
+  var pcs = bulan[negara.bulan].tgl.split('-');
+  var y = +pcs[0], m = +pcs[1] - 1, d = +pcs[2];
+  var penuh = BULAN_PJG[negara.lang][m] + ' ' + y;
+  if (negara.lang === 'en'){
+   return 'Viewing: ' + penuh + ' (as of ' + BULAN_SPT.en[m] + ' ' + d + ', ' + y + ')';
+  }
+  return 'Menampilkan: ' + penuh + ' (per ' + d + ' ' + BULAN_SPT.id[m] + ' ' + y + ')';
+ }
+
+ function grafikGaris(el, data, warna, penanda, etiket){
+  var n = data.length;
+  var lo = Math.min.apply(null, data), hi = Math.max.apply(null, data);
+  var rentang = (hi - lo) || 1, padding = rentang * 0.12;
+  var lantai = lo - padding, atap = hi + padding;
+  var W = 320, H = 120, L = 10, R = 10, X = W - L - R;
+  var titik = [], i, x, y;
+  for (i = 0; i < n; i++){
+   x = L + (n === 1 ? X / 2 : X * i / (n - 1));
+   y = (H - 12) - ((data[i] - lantai) / (atap - lantai)) * (H - 24);
+   titik.push([x, y]);
+  }
+  var jalan = titik.map(function(p, j){ return (j ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="none" role="img" aria-label="' + teksAman(etiket || '') + '">'
+   + '<path d="' + jalan + '" fill="none" stroke="' + warna + '" stroke-width="2.5"/>';
+  for (i = 0; i < n; i++){
+   var utuh = (i === penanda);
+   svg += '<circle cx="' + titik[i][0].toFixed(1) + '" cy="' + titik[i][1].toFixed(1) + '" r="' + (utuh ? 5 : 2.5)
+    + '" fill="' + warna + '"' + (utuh ? ' stroke="#FFFFFF" stroke-width="2"' : '') + '/>';
+  }
+  svg += '</svg>';
+  el.innerHTML = svg;
+ }
+ function grafikTren(){
+  grafikGaris(document.getElementById('g1'), bulan.map(function(x){ return x.total_piutang; }), '#1E3A5F', negara.bulan, t('g_piutang'));
+  grafikGaris(document.getElementById('g2'), bulan.map(function(x){ return x.dso; }), '#9B2C2C', negara.bulan, t('g_dso'));
+  grafikGaris(document.getElementById('g3'), bulan.map(function(x){ return x.tepat_waktu; }), '#2F6B5E', negara.bulan, t('g_tepat'));
+ }
+ function legUmur(){
+  var poci = '';
+  DEMO.urutan_bucket.forEach(function(k){
+   poci += '<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#374151">'
+    + '<span class="dot" style="background:#' + DEMO.warna_bucket[k] + '"></span>'
+    + teksAman(kunciBucket(k)) + '</span>';
+  });
+  document.getElementById('leg-umur').innerHTML = poci;
+ }
+ function kunciBucket(k){ return TEKS[negara.lang].bucket[k] || k; }
+ function umurGrafik(){
+  var urutan = DEMO.urutan_bucket;
+  var maks = Math.max.apply(null, bulan.map(function(b){ return b.total_piutang || 1; }));
+  var kolom = '';
+  bulan.forEach(function(b, i){
+   var seluruh = b.total_piutang || 1;
+   var potongan = '';
+   urutan.forEach(function(k){
+    var tinggi = (b.buckets[k] || 0) / maks * 100;
+    if (tinggi <= 0){ return; }
+    potongan += '<span style="height:' + tinggi.toFixed(2) + '%;background:#' + DEMO.warna_bucket[k]
+     + '" title="' + teksAman(namaBulan(i)) + ': ' + teksAman(kunciBucket(k)) + ' ' + teksAman(fmtRupiah(b.buckets[k] || 0)) + '"></span>';
+   });
+   kolom += '<div class="kol' + (i === negara.bulan ? ' aktif' : '') + '" data-idx="' + i + '" role="button" tabindex="0"'
+    + (i === negara.bulan ? '' : ' style="opacity:.75"') + '>' + potongan + '</div>';
+  });
+  var el = document.getElementById('kolom-umur');
+  el.innerHTML = kolom;
+  Array.prototype.forEach.call(el.querySelectorAll('.kol'), function(k){
+   function pilih(){ negara.bulan = +k.getAttribute('data-idx'); render(); }
+   k.addEventListener('click', pilih);
+   k.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pilih(); } });
+  });
+ }
+ function chipBulan(){
+  var el = document.getElementById('chip-bulan');
+  var poci = '';
+  bulan.forEach(function(b, i){
+   poci += '<button type="button" class="chip-filter' + (i === negara.bulan ? ' aktif' : '')
+    + '" data-idx="' + i + '">' + teksAman(namaBulan(i)) + '</button>';
+  });
+  el.innerHTML = poci;
+  Array.prototype.forEach.call(el.querySelectorAll('[data-idx]'), function(btn){
+   btn.addEventListener('click', function(){ negara.bulan = +btn.getAttribute('data-idx'); render(); });
+  });
+ }
+ function chipUmur(){
+  var el = document.getElementById('chip-umur');
+  var poci = '<button type="button" class="chip-filter' + (negara.filter === '' ? ' aktif' : '')
+   + '" data-f="">' + teksAman(t('semua')) + '</button>';
+  DEMO.urutan_bucket.forEach(function(k){
+   poci += '<button type="button" class="chip-filter' + (negara.filter === k ? ' aktif' : '')
+    + '" data-f="' + k + '">' + teksAman(kunciBucket(k)) + '</button>';
+  });
+  el.innerHTML = poci;
+  Array.prototype.forEach.call(el.querySelectorAll('[data-f]'), function(btn){
+   btn.addEventListener('click', function(){
+    negara.filter = btn.getAttribute('data-f');
+    var chip = el.querySelectorAll('[data-f]');
+    Array.prototype.forEach.call(chip, function(c2){
+     c2.classList.toggle('aktif', c2.getAttribute('data-f') === negara.filter);
+    });
+    tabelPenunggak();
+   });
+  });
+ }
+ function tabelPenunggak(){
+  var b = bulan[negara.bulan];
+  var baris = '', tampil = 0;
+  b.top10.forEach(function(x){
+   var kode = kodeUmur(x.umur_tertua);
+   if (negara.filter && kode !== negara.filter){ return; }
+   tampil++;
+   baris += '<tr>'
+    + '<td class="kolom-nama"><b>' + teksAman(x.nama) + '</b></td>'
+    + '<td class="angka-col">' + teksAman(fmtRupiah(x.sisa)) + '</td>'
+    + '<td class="angka-col">' + teksAman(fmtRupiah(x.telat)) + '</td>'
+    + '<td>' + lencanaUmur(x.umur_tertua) + '</td>'
+    + '</tr>';
+  });
+  if (!tampil){
+   baris = '<tr class="baris-kosong"><td colspan="4">' + teksAman(t('tamu_kosong')) + '</td></tr>';
+  }
+  document.getElementById('daftar-penunggak').innerHTML = baris;
+ }
+ function temuanBuat(){
+  var b = bulan[negara.bulan];
+  var tk = b.temuan;
+  var item = [], x;
+   if (tk.puncak){
+    var daftar = tk.puncak.top5.map(function(n){
+     return '<b>' + teksAman(n[0]) + '</b> (' + teksAman(fmtRupiah(n[1])) + ')';
+    }).join(', ');
+    item.push({judul: t('temuan_puncak'),
+     isi: teksAman(t('t1'))
+      .replace('{daftar}', daftar)
+      .replace('{pct}', teksAman(fmtDes(tk.puncak.pct)) + '%')});
+   } else {
+    item.push({judul: t('temuan_puncak'), isi: teksAman(t('t1_kosong'))});
+   }
+  var m = tk.macet;
+  if (m.rp > 0){
+   x = m.pct >= 5 ? t('t2_besar') : t('t2_kecil');
+   item.push({judul: t('temuan_macet'), isi: teksAman(x)
+    .replace('{rp_s}', teksAman(fmtRpSingkat(m.rp)))
+    .replace('{pct}', teksAman(fmtDes(m.pct)) + '%')});
+  } else {
+   item.push({judul: t('temuan_macet'), isi: teksAman(t('t2_nol'))});
+  }
+  var dso = tk.dso;
+  var bln_dulu = negara.bulan > 0 ? namaBulan(negara.bulan - 1) : '';
+  if (dso.delta === null || dso.delta === undefined){
+   x = t('t3_perdana');
+  } else if (dso.delta > 0){
+   x = t('t3_naik');
+  } else if (dso.delta < 0){
+   x = t('t3_turun');
+  } else {
+   x = t('t3_sama');
+  }
+  x = x.replace('{dso}', fmtDes(dso.val))
+   .replace('{d}', fmtDes(Math.abs(dso.delta || 0)))
+   .replace('{bln}', teksAman(bln_dulu));
+  item.push({judul: t('temuan_dso'), isi: x});
+  var html = '';
+  item.forEach(function(xi, i){
+   html += '<li><span class="tautan-urut">' + (i + 1) + '</span><div><b>' + xi.judul + '</b><p>' + xi.isi + '</p></div></li>';
+  });
+  document.getElementById('daftar-temuan').innerHTML = html;
+ }
+ function render(){
+  pasangTeks();
+  chipBulan();
+  chipUmur();
+  tampilHero();
+  grafikTren();
+  legUmur();
+  umurGrafik();
+  tabelPenunggak();
+  temuanBuat();
+ }
+ document.getElementById('tbl-id').addEventListener('click', function(){ negara.lang = 'id'; simpanLang(); render(); });
+ document.getElementById('tbl-en').addEventListener('click', function(){ negara.lang = 'en'; simpanLang(); render(); });
+ function simpanLang(){ try { localStorage.setItem('demo-lang', negara.lang); } catch(e){} }
+ render();
+})();
+</script>
+</body>
+</html>
