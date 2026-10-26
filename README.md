@@ -25,9 +25,9 @@ The data is simulated: a fictional building-materials distributor with 12 months
 
 The month buttons at the top are 12 snapshots, one per month. Each shows the books as of the 25th. Click a month and every number on the page changes to match.
 
-![Overview](screenshots/01-overview.png)
-![Trend and aging](screenshots/02-trend-aging.png)
-![Late payers](screenshots/03-late-payers.png)
+![Overview](1.png)
+![Trend and aging](2.png)
+![Late payers](3.png)
 
 ## Status
 
