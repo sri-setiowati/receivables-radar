@@ -2,7 +2,7 @@
 
 > A dashboard and collection tool for businesses that sell on credit. It shows which overdue invoices to chase first.
 
-**[Live demo](https://sri-setiowati.github.io/receivables-radar/)** · **[Chat with me on WhatsApp](https://wa.me/62XXXXXXXXXXX?text=Hi%20Sri%2C%20I%20saw%20your%20Receivables%20Radar%20demo%20and%20I%27d%20like%20to%20try%20it%20on%20my%20invoices.)**
+**[Live demo](https://sri-setiowati.github.io/receivables-radar/)** · **[Chat with me on WhatsApp](https://wa.me/6285932888258?text=Hi%20Sri%2C%20I%20saw%20your%20Receivables%20Radar%20demo%20and%20I%27d%20like%20to%20try%20it%20on%20my%20invoices.)**
 
 In the simulated demo data, 79 invoices fell due in the last 30 days and only 28 were paid on time. The useful question is which customers to call first.
 
