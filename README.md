@@ -8,7 +8,7 @@ In the simulated demo data, 79 invoices fell due in the last 30 days and only 28
 
 I ran a building-materials store for 17 years, so I have chased my share of late invoices. Deciding who to call first was harder than the calls themselves, especially when ten customers owed money and I had one afternoon.
 
-![Findings](4.png)
+![Findings](04-findings.png)
 
 ## What it does
 
@@ -21,7 +21,7 @@ I ran a building-materials store for 17 years, so I have chased my share of late
 
 ## Free pilot for businesses that sell on credit
 
-I am looking for two or three businesses willing to run Receivables Radar on a real invoice file. The pilot is free. In return, I ask to use the results as a case study, and your company name can stay anonymous.
+So far I have tested Receivables Radar only on simulated data. That is why I am looking for two or three businesses willing to run it on a real invoice file. The pilot is free. In return, I ask to use the results as a case study, and your company name can stay anonymous.
 
 **What you get within 2 to 3 days**
 
@@ -38,7 +38,7 @@ I am looking for two or three businesses willing to run Receivables Radar on a r
 
 If you want to continue after the pilot, we agree on a fixed price before any work starts.
 
-**[Start on WhatsApp](https://wa.me/62XXXXXXXXXXX?text=Hi%20Sri%2C%20I%20saw%20your%20Receivables%20Radar%20demo%20and%20I%27d%20like%20to%20try%20it%20on%20my%20invoices.)**
+**[Start on WhatsApp](https://wa.me/6285932888258?text=Hi%20Sri%2C%20I%20saw%20your%20Receivables%20Radar%20demo%20and%20I%27d%20like%20to%20try%20it%20on%20my%20invoices.)**
 
 ## About the demo
 
@@ -48,9 +48,9 @@ The month buttons at the top are 12 snapshots, one per month. Each shows the boo
 
 The live demo shows the dashboard only. The full tool also reads invoice files, ranks customers and drafts the WhatsApp messages. It runs locally, and its source code is not published in this repository.
 
-![Overview](1.png)
-![Trend and aging](2.png)
-![Late payers](3.png)
+![Overview](01-overview.png)
+![Trend and aging](02-trend-aging.png)
+![Late payers](03-late-payers.png)
 
 ## Built with
 
