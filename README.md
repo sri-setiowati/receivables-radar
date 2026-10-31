@@ -12,7 +12,7 @@ I ran a building-materials store for 17 years, so I have chased my share of late
 
 ## What it does
 
-- Reads an invoice export from a spreadsheet, including messy dates and amounts
+- Reads Excel (.xlsx) invoice exports with different column names, total rows and Indonesian number formats
 - Groups receivables by age: not yet due, 1-30, 31-60, 61-90 and 90+ days overdue
 - Ranks customers by how much they owe and how late they are
 - Calculates days sales outstanding (DSO) and the share of invoices paid on time
