@@ -18,6 +18,7 @@ I ran a building-materials store for 17 years, so I have chased my share of late
 - Calculates days sales outstanding (DSO) and the share of invoices paid on time
 - Writes three findings from the data, for example how much of the overdue balance sits with the top five customers
 - Drafts a WhatsApp reminder for each customer
+- Reads Excel (.xlsx) invoice exports with different column names, total rows and Indonesian number formats
 
 ## Free pilot for businesses that sell on credit
 
@@ -59,6 +60,7 @@ The live demo shows the dashboard only. The full tool also reads invoice files, 
 | Data processing and tests | Python, 80 automated tests |
 | Dashboard | Plain HTML and JavaScript, one file, works offline |
 | Browser checks | Headless Chromium via Playwright |
+| Data processing and tests | Python, 100 automated tests |
 
 ## More of my work
 
