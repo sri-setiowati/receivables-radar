@@ -3,15 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UD Sinar Bangun Jaya - Receivables Radar demo dashboard</title>
-<meta name="description" content="Interactive receivables aging dashboard (Piutang Radar) - demo built from simulated data of a fictional building-materials distributor. Single self-contained HTML file.">
-<meta property="og:title" content="UD Sinar Bangun Jaya - Receivables Radar demo dashboard">
-<meta property="og:description" content="Receivables aging dashboard demo: overdue percentages, aging buckets, top debtors, DSO and on-time payment - all from simulated data, computed in the browser.">
+<title>Receivables Radar: collection dashboard demo (simulated data)</title>
+<meta name="description" content="Receivables aging dashboard demo with overdue share, aging buckets, top late payers, DSO and on-time payment. All data is simulated.">
+<meta property="og:title" content="Receivables Radar: collection dashboard demo (simulated data)">
+<meta property="og:description" content="Receivables aging dashboard demo with overdue share, aging buckets, top late payers, DSO and on-time payment. All data is simulated.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://sri-setiowati.github.io/receivables-radar/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Receivables Radar: collection dashboard demo (simulated data)">
+<meta name="twitter:description" content="Receivables aging dashboard demo with overdue share, aging buckets, top late payers, DSO and on-time payment. All data is simulated.">
 <style>:root{--bg:#F4F6FA;--kartu:#FFFFFF;--garis:#E5E7EB;--tinta:#1F2937;--redup:#6B7280;
 --utama:#1E3A5F;--utama-tua:#12263F;--teal:#0F7B6C;--jejak:#EEF1F5}
 *{box-sizing:border-box}
@@ -391,8 +393,8 @@ th,td{padding:4px 6px}
    document.getElementById('tbl-en').classList.toggle('aktif', negara.lang === 'en');
    document.documentElement.setAttribute('lang', negara.lang);
    document.title = negara.lang === 'id'
-    ? npm + ' - Piutang Radar - dashboard demo'
-    : npm + ' - Receivables Radar demo dashboard';
+     ? 'Piutang Radar: demo dashboard penagihan'
+     : 'Receivables Radar: collection dashboard demo';
    document.querySelector('.ring').setAttribute('aria-label', t('aria_ring'));
    document.getElementById('chip-bulan').setAttribute('aria-label', t('aria_bulan'));
    document.getElementById('leg-umur').setAttribute('aria-label', t('aria_legenda'));
