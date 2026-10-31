@@ -57,10 +57,9 @@ The live demo shows the dashboard only. The full tool also reads invoice files, 
 
 | Part | Tool |
 | :--- | :--- |
-| Data processing and tests | Python, 80 automated tests |
+| Data processing and tests | Python, 100 automated tests |
 | Dashboard | Plain HTML and JavaScript, one file, works offline |
 | Browser checks | Headless Chromium via Playwright |
-| Data processing and tests | Python, 100 automated tests |
 
 ## More of my work
 
